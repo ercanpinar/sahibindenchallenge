@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.android.volley.Response;
@@ -52,6 +53,7 @@ public class ImageListFragment extends ListFragment {
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
+
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -62,6 +64,7 @@ public class ImageListFragment extends ListFragment {
          * Callback for when an item has been selected.
          */
         public void onItemSelected(Long id);
+
     }
 
     /**
@@ -83,64 +86,24 @@ public class ImageListFragment extends ListFragment {
     public static HashMap<Long,Image> ITEM_MAP;
     private ArrayList<Image> imageArrayList;
     private Activity mActivity;
+    private ImageListAdapter imageListAdapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ITEM_MAP=new HashMap<>();
         mActivity=(ImageListActivity)getActivity();
-//        if(!internetConnectionCheck()){
-//            Toast.makeText(mActivity.getApplicationContext(), "İnternet bağlantınızı kontrol ediniz.", Toast.LENGTH_SHORT).show();
-//        }else {
-            final String URL = "https://api.500px.com/v1/photos?feature=popular&consumer_key=jlnyuEd6b8RFuvutw9yL7Xh5WuBepr3EqjjFE2ZN&page=1";
-            JsonObjectRequest jsonRequest = new JsonObjectRequest(URL, null,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                if(response.getJSONArray("photos")!=null){
-
-                                    JSONArray imagesJsonArray= response.getJSONArray("photos");
-                                    imageArrayList=new ArrayList<>();
-                                    for (int i = 0; i <imagesJsonArray.length() ; i++) {
-                                        JSONObject jsonObject=imagesJsonArray.getJSONObject(i);
-                                        JSONObject user= jsonObject.getJSONObject("user");
-                                        JSONObject avatars = user.getJSONObject("avatars");
-                                        Image image= new Image();
-                                        image.setId(user.getLong("id"));
-                                        image.setName(user.getString("username"));
-                                        image.setUserAvatarUrlSmall(avatars.getJSONObject("small").getString("https"));
-                                        image.setUserAvatarUrlBig(avatars.getJSONObject("large").getString("https"));
-                                        image.setDescription(jsonObject.getString("description"));
-                                        image.setNameImage(jsonObject.getString("name"));
-                                        image.setUrlImage(jsonObject.getString("image_url"));
-                                        imageArrayList.add(image);
-                                        ITEM_MAP.put(user.getLong("id"),image);
-                                    }
-                                    setListAdapter(new ImageListAdapter(
-                                            getActivity(),
-                                            imageArrayList));
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    VolleyLog.e("Error: ", error.toString());
-                }
-            });
-
-            Volley.newRequestQueue(mActivity).add(jsonRequest);
-//        }
+        imageArrayList=new ArrayList<>();
+        imageListAdapter=new ImageListAdapter(
+                getActivity(),
+                imageArrayList);
+        setListAdapter(imageListAdapter);
+        imageRequestMethod(1);
 
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Restore the previously serialized activated item position.
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
@@ -150,8 +113,6 @@ public class ImageListFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        // Activities containing this fragment must implement its callbacks.
         if (!(activity instanceof Callbacks)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
@@ -206,15 +167,66 @@ public class ImageListFragment extends ListFragment {
 
         mActivatedPosition = position;
     }
+    // Append more data into the adapter
+    public void customLoadMoreDataFromApi(int offset) {
+        imageRequestMethod(offset);
 
-    /**
-     * Methods of controlling the Internet connection status.
-     * */
-    public boolean internetConnectionCheck() {
-        ConnectivityManager cm = (ConnectivityManager) mActivity.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+    public int pageFlag;
+    public void imageRequestMethod(int page){
+        pageFlag=page;
+        final String URL = "https://api.500px.com/v1/photos?feature=popular&consumer_key=jlnyuEd6b8RFuvutw9yL7Xh5WuBepr3EqjjFE2ZN&page="+page;
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(URL, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(response.getJSONArray("photos")!=null){
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        return isConnected;
+                                JSONArray imagesJsonArray= response.getJSONArray("photos");
+
+                                for (int i = 0; i <imagesJsonArray.length() ; i++) {
+                                    JSONObject jsonObject=imagesJsonArray.getJSONObject(i);
+                                    JSONObject user= jsonObject.getJSONObject("user");
+                                    JSONObject avatars = user.getJSONObject("avatars");
+                                    Image image= new Image();
+                                    image.setId(user.getLong("id"));
+                                    image.setName(user.getString("username"));
+                                    image.setUserAvatarUrlSmall(avatars.getJSONObject("small").getString("https"));
+                                    image.setUserAvatarUrlBig(avatars.getJSONObject("large").getString("https"));
+                                    image.setDescription(jsonObject.getString("description"));
+                                    image.setNameImage(jsonObject.getString("name"));
+                                    image.setUrlImage(jsonObject.getString("image_url"));
+                                    imageArrayList.add(image);
+                                    ITEM_MAP.put(user.getLong("id"),image);
+                                }
+
+                                imageListAdapter.notifyDataSetChanged();
+                                createListViewEndlesListener(pageFlag);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.toString());
+            }
+        });
+
+        Volley.newRequestQueue(mActivity).add(jsonRequest);
+    }
+
+    private void createListViewEndlesListener(int page) {
+        if(page==1){
+            getListView().setOnScrollListener(new EndlessScrollListener() {
+                @Override
+                public boolean onLoadMore(int page, int totalItemsCount) {
+                    customLoadMoreDataFromApi(page);
+                    return true;
+                }
+            });
+        }
     }
 }

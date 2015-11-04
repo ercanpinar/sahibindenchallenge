@@ -69,14 +69,6 @@ public class ImageListActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Paylaşılıyor.", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
 
         if (findViewById(R.id.image_detail_container) != null) {
             // The detail container view will be present only in the
@@ -118,7 +110,7 @@ public class ImageListActivity extends AppCompatActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, ImageDetailActivity.class);
-            detailIntent.putExtra(ImageDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(ImageDetailFragment.ARG_ITEM_ID,""+id);
             startActivity(detailIntent);
         }
     }

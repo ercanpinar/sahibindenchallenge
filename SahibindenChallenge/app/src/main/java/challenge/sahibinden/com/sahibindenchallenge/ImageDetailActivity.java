@@ -28,14 +28,6 @@ public class ImageDetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
 
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -53,8 +45,8 @@ public class ImageDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(ImageDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(ImageDetailFragment.ARG_ITEM_ID));
+            String idStr=getIntent().getStringExtra(ImageDetailFragment.ARG_ITEM_ID);
+            arguments.putLong(ImageDetailFragment.ARG_ITEM_ID,Long.valueOf(idStr));
             ImageDetailFragment fragment = new ImageDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
