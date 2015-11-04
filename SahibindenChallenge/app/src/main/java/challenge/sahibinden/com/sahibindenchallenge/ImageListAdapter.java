@@ -56,13 +56,17 @@ public class ImageListAdapter extends BaseAdapter {
                 (TextView) item.findViewById(R.id.name_textview);
         ImageView imageView =
                 (ImageView) item.findViewById(R.id.icon_imageview);
-
+        ImageView imageUserView =
+                (ImageView) item.findViewById(R.id.icon_user_imageview);
         Image image = mImageList.get(position);
 
-        textView.setText(image.getName());
+        textView.setText(image.getNameImage()+"/"+image.getName());
         Glide.with(mActivity)
-                .load(image.getUrl())
+                .load(image.getUrlImage())
                 .into(imageView);
+        Glide.with(mActivity)
+                .load(image.getUserAvatarUrlSmall())
+                .into(imageUserView);
         return item;
     }
 }

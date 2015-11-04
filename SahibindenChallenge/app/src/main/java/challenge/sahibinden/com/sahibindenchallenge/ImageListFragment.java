@@ -7,9 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -105,13 +103,18 @@ public class ImageListFragment extends ListFragment {
                                     imageArrayList=new ArrayList<>();
                                     for (int i = 0; i <imagesJsonArray.length() ; i++) {
                                         JSONObject jsonObject=imagesJsonArray.getJSONObject(i);
+                                        JSONObject user= jsonObject.getJSONObject("user");
+                                        JSONObject avatars = user.getJSONObject("avatars");
                                         Image image= new Image();
-                                        image.setId(jsonObject.getLong("id"));
-                                        image.setName(jsonObject.getString("name"));
-                                        image.setUrl(jsonObject.getString("image_url"));
+                                        image.setId(user.getLong("id"));
+                                        image.setName(user.getString("username"));
+                                        image.setUserAvatarUrlSmall(avatars.getJSONObject("small").getString("https"));
+                                        image.setUserAvatarUrlBig(avatars.getJSONObject("large").getString("https"));
                                         image.setDescription(jsonObject.getString("description"));
+                                        image.setNameImage(jsonObject.getString("name"));
+                                        image.setUrlImage(jsonObject.getString("image_url"));
                                         imageArrayList.add(image);
-                                        ITEM_MAP.put(jsonObject.getLong("id"),image);
+                                        ITEM_MAP.put(user.getLong("id"),image);
                                     }
                                     setListAdapter(new ImageListAdapter(
                                             getActivity(),
