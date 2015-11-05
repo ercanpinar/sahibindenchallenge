@@ -1,13 +1,9 @@
 package challenge.sahibinden.com.sahibindenchallenge;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.android.volley.Response;
@@ -15,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -134,7 +131,7 @@ public class ImageListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(imageArrayList.get(position).getId());
+        mCallbacks.onItemSelected(imageArrayList.get(position).id);
     }
 
     @Override
@@ -187,18 +184,10 @@ public class ImageListFragment extends ListFragment {
 
                                 for (int i = 0; i <imagesJsonArray.length() ; i++) {
                                     JSONObject jsonObject=imagesJsonArray.getJSONObject(i);
-                                    JSONObject user= jsonObject.getJSONObject("user");
-                                    JSONObject avatars = user.getJSONObject("avatars");
-                                    Image image= new Image();
-                                    image.setId(user.getLong("id"));
-                                    image.setName(user.getString("username"));
-                                    image.setUserAvatarUrlSmall(avatars.getJSONObject("small").getString("https"));
-                                    image.setUserAvatarUrlBig(avatars.getJSONObject("large").getString("https"));
-                                    image.setDescription(jsonObject.getString("description"));
-                                    image.setNameImage(jsonObject.getString("name"));
-                                    image.setUrlImage(jsonObject.getString("image_url"));
+                                    Gson gson = new Gson();
+                                    Image image = gson.fromJson(jsonObject.toString(), Image.class);
                                     imageArrayList.add(image);
-                                    ITEM_MAP.put(user.getLong("id"),image);
+                                    ITEM_MAP.put(image.id,image);
                                 }
 
                                 imageListAdapter.notifyDataSetChanged();

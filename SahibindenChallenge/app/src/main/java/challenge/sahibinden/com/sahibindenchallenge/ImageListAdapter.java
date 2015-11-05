@@ -60,12 +60,12 @@ public class ImageListAdapter extends BaseAdapter {
                 (ImageView) item.findViewById(R.id.icon_user_imageview);
         Image image = mImageList.get(position);
 
-        textView.setText(image.getNameImage()+"/"+image.getName());
+        textView.setText(image.name+"/"+image.user.username);
         Glide.with(mActivity)
-                .load(image.getUrlImage())
+                .load(image.image_url)
                 .into(imageView);
         Glide.with(mActivity)
-                .load(image.getUserAvatarUrlSmall())
+                .load(image.user.avatars.large.https)
                 .into(imageUserView);
         return item;
     }

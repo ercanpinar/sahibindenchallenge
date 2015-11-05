@@ -51,7 +51,7 @@ public class ImageDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getName());
+                appBarLayout.setTitle(mItem.user.username);
             }
         }
     }
@@ -64,15 +64,18 @@ public class ImageDetailFragment extends Fragment {
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
             ImageView imageView= (ImageView) rootView.findViewById(R.id.image_imageview);
-            Glide.with(getActivity())
-                    .load(mItem.getUrlImage())
-                    .into(imageView);
+            if(mItem.image_url!=null)
+                Glide.with(getActivity())
+                        .load(mItem.image_url)
+                        .into(imageView);
             ImageView imageUserView= (ImageView) rootView.findViewById(R.id.image_user_imageview);
-            Glide.with(getActivity())
-                    .load(mItem.getUserAvatarUrlBig())
-                    .into(imageUserView);
-            ((TextView) rootView.findViewById(R.id.image_name_textview)).setText(mItem.getNameImage() +"  /  "+mItem.getName());
-            ((TextView) rootView.findViewById(R.id.image_detail_textview)).setText(Html.fromHtml(mItem.getDescription()));
+            if(mItem.user.avatars.large.https!=null)
+                Glide.with(getActivity())
+                        .load(mItem.user.avatars.large.https)
+                        .into(imageUserView);
+            ((TextView) rootView.findViewById(R.id.image_name_textview)).setText(mItem.name + "  /  " + mItem.user.username);
+            if(mItem.description!=null)
+                ((TextView) rootView.findViewById(R.id.image_detail_textview)).setText(Html.fromHtml(mItem.description));
         }
 
         return rootView;
